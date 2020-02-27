@@ -1,24 +1,24 @@
 ---
-title: "BURRO DEL PERRO 8000"
-author:  "Juan Silva"
+title: "Juan Silva"
+author:  ""
 output:
   html_document:
     fig_width: 1
 ---
 
-----
-***CALLAMPA DE BURRO*** 
+![](images/juan.jpg)
 
-***Pija de callampa***
+**Sociologist, Universidad Católica de Chile**
 
+**MSc Environmental Science & Management, Bren School - University of California, Santa Barbara**
 
-
-
-    
-    [Desktop App](https://desktop.github.com/)
-   
-----
+**Social Ecological Systems | Coastal Marine Governance**
 
 
-**Examples:**
+[Latin American Fisheries Fellowship](https://www.laff.bren.ucsb.edu/laff-network/juan-silva)
+
+[LinkedIn](https://www.linkedin.com/in/juansilvaira/)
+
+
+
 
