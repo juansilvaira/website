@@ -29,7 +29,7 @@ snowshoe <- read_csv("showshoe_lter.csv")
 
 <p>&nbsp;</p>
 
-**Task 1: Data wrangling & visualization (snowshoe hares)**
+**Project 1: Data wrangling & visualization (snowshoe hares)**
 
 This project will compare the relations between age and weight, and sex and weight for snowshoe population. The data was taken from Kielland et al (2017), and corresponds to snowshoe hares observed in Bonanza Creek Experimental Forest, Alaska, US. 
 
@@ -177,7 +177,7 @@ table_snow
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 
-**Task 2: Principal Component Analysis**
+**Project 2: Principal Component Analysis**
 
 <p>&nbsp;</p>
 

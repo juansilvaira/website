@@ -11,7 +11,7 @@
 
 
 
-<title>Projects 1 &amp; 2: Data Wrangling and Principal Component Analysis</title>
+<title>Project 3: Time series analysis</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -22,7 +22,6 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -296,7 +295,7 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Projects 1 &amp; 2: Data Wrangling and Principal Component Analysis</h1>
+<h1 class="title toc-ignore">Project 3: Time series analysis</h1>
 
 </div>
 
@@ -304,186 +303,113 @@ $(document).ready(function () {
 <p>
  
 </p>
-<p><strong>Project 1: Data wrangling &amp; visualization (snowshoe hares)</strong></p>
-<p>This project will compare the relations between age and weight, and sex and weight for snowshoe population. The data was taken from Kielland et al (2017), and corresponds to snowshoe hares observed in Bonanza Creek Experimental Forest, Alaska, US.</p>
+<p><strong>Project 3: Time series data wrangling, exploration and visualization</strong></p>
+<p>In this project I will wrangle, explore, and visualize time series data for steelhead salmon passage across the Bonneville Dam (Oregon) from 1940 - 2019. I will present a time series plot with daily data on passage counts, a seasonplot to explore if/how monthly passage has shifted over time, and a visualization of annual steelhead passage counts.</p>
 <p>
  
 </p>
-<img src="images/1.jpg" width="70%" style="display: block; margin: auto;" />
+<img src="images/steel.jpg" width="70%" style="display: block; margin: auto;" />
 <center>
-<p>Snowshoe hare <em>(Lepus americanus)</em>. <em>Photo: The National Wildlife Federation</em></p>
+<p>Steelhead <em>(Oncorhynchus mykiss)</em>. <em>Photo: United States Department of Agriculture, Forest Service</em></p>
 </center>
 <p>
  
 </p>
-<p>This is the code I used to produce the graph that comes after:</p>
-<pre class="r"><code>snowshoetidy &lt;- snowshoe %&gt;%
-  rename(Age=age) %&gt;% 
-  select(l_ear, r_ear, sex, Age, weight, hindft) %&gt;%  
-  filter(sex %in% c(&quot;f&quot;,&quot;m&quot;, &quot;M&quot;, &quot;F&quot;)) %&gt;% 
-  mutate(                     
-      sex = case_when(
-  sex == &quot;f&quot; ~ &quot;F&quot;,
-  sex == &quot;m&quot; ~ &quot;M&quot;)) %&gt;% 
-  filter(sex != &quot;NA&quot;)  %&gt;% 
-  filter(Age %in% c(&quot;a&quot;,&quot;j&quot;, &quot;A&quot;, &quot;J&quot;)) %&gt;% 
-  mutate(                       
-      Age = case_when(
-  Age == &quot;a&quot; ~ &quot;A&quot;,
-  Age == &quot;j&quot; ~ &quot;J&quot;)) %&gt;% 
-  filter(Age != &quot;NA&quot;)  
+<p>
+ 
+</p>
+<p>This is the code I used to produce Figure 1:</p>
+<pre class="r"><code>fish &lt;- read_csv(&quot;cbr_fish_passage_bonneville_allyrs_steelhead.csv&quot;)
 
-agesexweighttidybox &lt;- ggplot(snowshoetidy, aes(x=sex, y=weight))+
-  geom_boxplot(aes(color=Age)) +
-  labs (x = &quot;Sex&quot;, y = &quot;Weight (grams)&quot;, title = &quot;Snowshoe hare weight per sex and age&quot;) +
-  theme_classic() </code></pre>
+fishdate &lt;-  fish %&gt;% 
+  separate(`mm-dd`, into = c(&quot;day&quot;, &quot;month&quot;)) %&gt;% 
+  mutate(date = paste(year, month, day, sep = &quot;-&quot;),
+         month_sep = paste(year, month, sep = &quot;-&quot;),
+         month_sep1= yearmonth(month_sep)) %&gt;% 
+  drop_na(value)
+
+fish_gg &lt;- ggplot(data = fishdate, aes(x = month_sep1, y = value)) +
+  geom_line() +
+  theme_minimal() +
+  scale_y_continuous(limits = c(0, 350)) +
+    labs (x = &quot;Time (days)&quot;, y = &quot;Count&quot;, title = &quot;Time series of passage counts for Steelhead in Bonneville Dam (1939-2019)&quot;)
+
+fish_gg</code></pre>
+<p><img src="proj3_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p><strong>Figure 1</strong>: Time series of passage counts for Steelhead in Bonneville Dam (1939-2019) per day. <em>Source: Columbia River DART, Columbia Basin Research, University of Washington. (2019). Adult Passage Graphics &amp; Text.</em></p>
 <p>
  
 </p>
-<p><img src="projs1and2_files/figure-html/unnamed-chunk-3-1.png" width="672" /> </p>
-<p><strong>Figure 1</strong>: Differences in weight for snowshoe hares based on age and sex. <em>Source: Kielland K., F. S. Chapin, R. W. Ruess. 2017. Snowshoe hare physical data in Bonanza Creek Experimental Forest: 1999-Present. Environmental Data Initiative.</em></p>
+<p>Since it seems really difficult to identify any patterns with the data presented by day, I tried a new time series plot, but this time by month.</p>
 <p>
  
 </p>
-<p><em>Figure 1</em> shows that adult individuals are in average much heavier than juveniles. This is valid for both sexes, between which no great differences are observed.</p>
-<p>
- 
-</p>
-<p>This is the code I used to produce the table that comes after:</p>
-<pre class="r"><code>summary_snow&lt;- snowshoetidy %&gt;% 
-  rename(Sex=sex) %&gt;% 
-  group_by(Sex) %&gt;% 
+<p>This is the code I used to produce Figure 2:</p>
+<pre class="r"><code>fishdate2 &lt;- fishdate %&gt;% 
+  group_by(month_sep1) %&gt;% 
   summarise(
-    Median = round(median(weight, na.rm = TRUE), digits = 2),
-    Maximum = round(max(weight, na.rm = TRUE), digits = 2),
-    Mean = round(mean(weight, na.rm = TRUE), digits = 2),
-    `Standard Deviation` = round(sd(weight, na.rm = TRUE), digits = 2),
-    `Sample Size`= length(weight)) 
- 
-table_snow &lt;- kable(summary_snow,
-                   booktabs = T) %&gt;%
-  kable_styling(bootstrap_option = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;, &quot;responsive&quot;, &quot;hold_position&quot;), full_width = FALSE, position = &quot;center&quot;)</code></pre>
-<p>
- 
-</p>
-<table class="table table-striped table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<thead>
-<tr>
-<th style="text-align:left;">
-Sex
-</th>
-<th style="text-align:right;">
-Median
-</th>
-<th style="text-align:right;">
-Maximum
-</th>
-<th style="text-align:right;">
-Mean
-</th>
-<th style="text-align:right;">
-Standard Deviation
-</th>
-<th style="text-align:right;">
-Sample Size
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-F
-</td>
-<td style="text-align:right;">
-1290.0
-</td>
-<td style="text-align:right;">
-1930
-</td>
-<td style="text-align:right;">
-1219.16
-</td>
-<td style="text-align:right;">
-406.24
-</td>
-<td style="text-align:right;">
-138
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-M
-</td>
-<td style="text-align:right;">
-1402.5
-</td>
-<td style="text-align:right;">
-1800
-</td>
-<td style="text-align:right;">
-1322.33
-</td>
-<td style="text-align:right;">
-333.75
-</td>
-<td style="text-align:right;">
-153
-</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Table 1</strong>: Median, Maximum, Mean, and Standard Deviation Weight of Snowshoe Hare by Sex. <em>Source: Kielland K., F. S. Chapin, R. W. Ruess. 2017. Snowshoe hare physical data in Bonanza Creek Experimental Forest: 1999-Present. Environmental Data Initiative.</em></p>
-<p>
- 
-</p>
-<p><em>Table 1</em> shows that the average weight of males is higher than in females. However, the maximum weight was recorded by a female individual. Females also show a higher standard deviation.</p>
-<p>
- 
-</p>
-<p>
- 
-</p>
-<p>
- 
-</p>
-<p><strong>Project 2: Principal Component Analysis</strong></p>
-<p>
- 
-</p>
-<p>We will be performing a Principal Component Analysis to understand relationships between miscellaneous environmental and climatic variables at the country level. The data used was compiled and provided by <span class="citation">@zander_venter</span> on Kaggle, described as: “This data is all acquired through Google Earth Engine (<a href="https://earthengine.google.com/" class="uri">https://earthengine.google.com/</a>) where publicly available remote sensing datasets have been uploaded…Most of the data is derived by calculating the mean for each country at a reduction scale of about 10km.”</p>
-<p>
- 
-</p>
-<p>This is the code I used to produce the table that comes after:</p>
-<pre class="r"><code>world &lt;- read_csv(&quot;world_env_vars.csv&quot;)
+    sumvalue= sum(value)) 
 
-world_nona &lt;- world %&gt;% 
-  drop_na()
+fish_gg2 &lt;- ggplot(data = fishdate2, aes(x = month_sep1, y = sumvalue)) +
+  geom_line() +
+  theme_minimal() +
+   labs (x = &quot;Time (months)&quot;, y = &quot;Count&quot;, title = &quot;Time series of passage counts for Steelhead in Bonneville Dam (1939-2019)&quot;) + scale_y_continuous(labels = scales::comma)
 
-world_nona$Country = as.numeric(as.factor(world_nona$Country))
-
-world_pca &lt;- prcomp(world_nona, scale = TRUE)
-
-my_biplot &lt;- autoplot(world_pca, 
-                      colour = NA,
-                      loadings.label = TRUE,
-                      loadings.label.size = 3,
-                      loadings.label.colour = &quot;black&quot;,
-                      loadings.label.repel = TRUE) +
-  theme_minimal()</code></pre>
+fish_gg2</code></pre>
+<p><img src="proj3_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p><strong>Figure 2</strong>: Time series of passage counts for Steelhead in Bonneville Dam (1939-2019) per month <em>Source: Columbia River DART, Columbia Basin Research, University of Washington. (2019). Adult Passage Graphics &amp; Text.</em></p>
 <p>
  
 </p>
-<p><img src="projs1and2_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
-<p><strong>Figure 2</strong>: Biplot of Miscellaneous environmental and climatic variables (country-level) <em>Source: Compiled and provided by <span class="citation">@zander_venter</span> on Kaggle from publicly available remote sensing datasets acquired through Google Earth Engine</em></p>
+<p>As observed in Figure 2, there is a very clear annual seasonality, but no clear cyclical trend. Even though there is a massive increase of salmon counts around years 2001 and 2010, it’s not clear that the trend is increasing. In fact, starting in year 2015, there is an important decrease in counts.</p>
 <p>
  
 </p>
-<p><em>Figure 2</em> shows us that:</p>
-<p>• Dominant contributors to PC1 are the minimum temperature in coldest month, isothermality and anual rain mean.</p>
-<p>• Dominant contributors to PC2 are the max temperature in the warmest month, temperature in the warmest quarter, and rain seasonality.</p>
-<p>• Some interesting observations are that rain is highly correlated with tree canopy cover, but does not have correlation with cropland cover.</p>
-<p>• Wind and elevation are negatively correlated with isothermality, and positively correlated with cropland cover.</p>
+<p>This is the code I used to produce Figure 3:</p>
+<pre class="r"><code># Parse the data
+fish_parsed &lt;- fishdate2 %&gt;% 
+  mutate(month = month(month_sep1, label = TRUE)) %&gt;% 
+  mutate(year = year(month_sep1))
+
+### Coerce to a tsibble:
+
+fish_ts &lt;- as_tsibble(fish_parsed, index = month_sep1)
+
+
+fishplot2 &lt;- ggplot(data = fish_parsed, aes(x = month, y = sumvalue, group = year)) +
+  geom_line(aes(color = year)) + 
+  theme_minimal() +
+   labs (x = &quot;Month&quot;, y = &quot;Count&quot;, title = &quot;Seasonplot of monthly passage of Steelhead in Bonneville Dam (1939-2019)&quot;) + scale_y_continuous(labels = scales::comma)
+
+fishplot2</code></pre>
+<p><img src="proj3_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p><strong>Figure 3</strong>: “Seasonplot of monthly passage of Steelhead in Bonneville Dam (1939-2019). <em>Source: Columbia River DART, Columbia Basin Research, University of Washington. (2019). Adult Passage Graphics &amp; Text.</em></p>
+<p>
+ 
+</p>
+<p>Figure 3 clearly shows that steelhead count peaks in August every year, and that those peaks have been getting larger in the 2000’s.</p>
+<p>
+ 
+</p>
+<p>This is the code I used to produce Figure 4:</p>
+<pre class="r"><code>fishdate3 &lt;- fishdate %&gt;% 
+  group_by(year) %&gt;% 
+  summarise(
+    sumvalue =sum(value)
+  )
+
+fish_gg3 &lt;- ggplot(data = fishdate3, aes(x = year, y = sumvalue)) +
+  geom_line() +
+  theme_minimal() +
+  labs (x = &quot;Year&quot;, y = &quot;Count&quot;, title = &quot;Annual Steelhead passage counts in Bonneville Dam (1939-2019)&quot;) + scale_y_continuous(labels = scales::comma)
+
+fish_gg3</code></pre>
+<p><img src="proj3_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p><strong>Figure 4</strong>: “Annual Steelhead passage counts in Bonneville Dam (1939-2019). <em>Source: Columbia River DART, Columbia Basin Research, University of Washington. (2019). Adult Passage Graphics &amp; Text.</em></p>
+<p>
+ 
+</p>
+<p>Figure 4 shows even more clearly the patterns of annual seasonality and relatively sustained increased in counts towards the year 2000-2010, and a decline after year 2015.</p>
 
 
 

@@ -1,5 +1,5 @@
 ---
-title: "Project 3: Time series analysis"
+title: 'Project 3: Time series analysis'
 ---
 
 
@@ -104,7 +104,7 @@ fishplot2
 
 <p>&nbsp;</p>
 
-**Task 2: Time series data wrangling, exploration and visualization**
+**Project 3: Time series data wrangling, exploration and visualization**
 
 In this project I will wrangle, explore, and visualize time series data for steelhead salmon passage across the Bonneville Dam (Oregon) from 1940 - 2019. I will present a  time series plot with daily data on passage counts, a seasonplot to explore if/how monthly passage has shifted over time, and a visualization of annual steelhead passage counts. 
 

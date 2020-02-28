@@ -4,7 +4,7 @@ navbar:
   left:
     - text: "Projects 1 & 2: Data Wrangling and Principal Component Analysis"
       href: projs1and2.html
-    - text: "Basic Workflow"
+    - text: "Project 3"
       href: basic_workflow.html
     - text: "Getting Sophisticated"
       href: getting_sophisticated.html
