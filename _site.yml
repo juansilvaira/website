@@ -5,7 +5,7 @@ navbar:
     - text: "Projects 1 & 2: Data Wrangling and Principal Component Analysis"
       href: projs1and2.html
     - text: "Project 3: Time series analysis"
-      href: basic_workflow.html
+      href: proj3.html
     - text: "Getting Sophisticated"
       href: getting_sophisticated.html
     - text: "Your Turn"
