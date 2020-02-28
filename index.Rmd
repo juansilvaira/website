@@ -1,6 +1,6 @@
 ---
 title: "Juan Silva"
-author:  ""
+author:  "juansilva@bren.ucsb.edu | +1 805 869 8234"
 output:
   html_document:
     fig_width: 1
@@ -12,13 +12,15 @@ output:
 
 **MSc Environmental Science & Management, Bren School - University of California, Santa Barbara**
 
-**Social Ecological Systems | Coastal Marine Governance**
+*Areas of interest: Social Ecological Systems | Coastal Marine Governance*
 
 
 [Latin American Fisheries Fellowship](https://www.laff.bren.ucsb.edu/laff-network/juan-silva)
 
 [LinkedIn](https://www.linkedin.com/in/juansilvaira/)
 
+
+<button onclick="window.open('resume.pdf')">Resume</button>
 
 
 
