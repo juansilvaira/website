@@ -2,8 +2,8 @@ name: "R Markdown Websites Tutorial"
 navbar:
   title: "HOME"
   left:
-    - text: "First Observations"
-      href: first_observations.html
+    - text: "Projects 1 & 2: Data Wrangling and Principal Component Analysis"
+      href: projs1and2.html
     - text: "Basic Workflow"
       href: basic_workflow.html
     - text: "Getting Sophisticated"

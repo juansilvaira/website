@@ -22,6 +22,7 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -272,7 +273,7 @@ $(document).ready(function () {
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="first_observations.html">First Observations</a>
+  <a href="projs1and2.html">Projects 1 &amp; 2: Data Wrangling and Principal Component Analysis</a>
 </li>
 <li>
   <a href="basic_workflow.html">Basic Workflow</a>
@@ -300,7 +301,189 @@ $(document).ready(function () {
 </div>
 
 
+<p>
+ 
+</p>
+<p><strong>Task 1: Data wrangling &amp; visualization (snowshoe hares)</strong></p>
+<p>This project will compare the relations between age and weight, and sex and weight for snowshoe population. The data was taken from Kielland et al (2017), and corresponds to snowshoe hares observed in Bonanza Creek Experimental Forest, Alaska, US.</p>
+<p>
+ 
+</p>
+<img src="images/1.jpg" width="70%" style="display: block; margin: auto;" />
+<center>
+<p>Snowshoe hare <em>(Lepus americanus)</em>. <em>Photo: The National Wildlife Federation</em></p>
+</center>
+<p>
+ 
+</p>
+<p>This is the code I used to produce the graph that comes after:</p>
+<pre class="r"><code>snowshoetidy &lt;- snowshoe %&gt;%
+  rename(Age=age) %&gt;% 
+  select(l_ear, r_ear, sex, Age, weight, hindft) %&gt;%  
+  filter(sex %in% c(&quot;f&quot;,&quot;m&quot;, &quot;M&quot;, &quot;F&quot;)) %&gt;% 
+  mutate(                     
+      sex = case_when(
+  sex == &quot;f&quot; ~ &quot;F&quot;,
+  sex == &quot;m&quot; ~ &quot;M&quot;)) %&gt;% 
+  filter(sex != &quot;NA&quot;)  %&gt;% 
+  filter(Age %in% c(&quot;a&quot;,&quot;j&quot;, &quot;A&quot;, &quot;J&quot;)) %&gt;% 
+  mutate(                       
+      Age = case_when(
+  Age == &quot;a&quot; ~ &quot;A&quot;,
+  Age == &quot;j&quot; ~ &quot;J&quot;)) %&gt;% 
+  filter(Age != &quot;NA&quot;)  
 
+agesexweighttidybox &lt;- ggplot(snowshoetidy, aes(x=sex, y=weight))+
+  geom_boxplot(aes(color=Age)) +
+  labs (x = &quot;Sex&quot;, y = &quot;Weight (grams)&quot;, title = &quot;Snowshoe hare weight per sex and age&quot;) +
+  theme_classic() </code></pre>
+<p>
+ 
+</p>
+<p><img src="projs1and2_files/figure-html/unnamed-chunk-3-1.png" width="672" /> </p>
+<p><strong>Figure 1</strong>: Differences in weight for snowshoe hares based on age and sex. <em>Source: Kielland K., F. S. Chapin, R. W. Ruess. 2017. Snowshoe hare physical data in Bonanza Creek Experimental Forest: 1999-Present. Environmental Data Initiative.</em></p>
+<p>
+ 
+</p>
+<p><em>Figure 1</em> shows that adult individuals are in average much heavier than juveniles. This is valid for both sexes, between which no great differences are observed.</p>
+<p>
+ 
+</p>
+<p>This is the code I used to produce the table that comes after:</p>
+<pre class="r"><code>summary_snow&lt;- snowshoetidy %&gt;% 
+  rename(Sex=sex) %&gt;% 
+  group_by(Sex) %&gt;% 
+  summarise(
+    Median = round(median(weight, na.rm = TRUE), digits = 2),
+    Maximum = round(max(weight, na.rm = TRUE), digits = 2),
+    Mean = round(mean(weight, na.rm = TRUE), digits = 2),
+    `Standard Deviation` = round(sd(weight, na.rm = TRUE), digits = 2),
+    `Sample Size`= length(weight)) 
+ 
+table_snow &lt;- kable(summary_snow,
+                   booktabs = T) %&gt;%
+  kable_styling(bootstrap_option = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;, &quot;responsive&quot;, &quot;hold_position&quot;), full_width = FALSE, position = &quot;center&quot;)</code></pre>
+<p>
+ 
+</p>
+<table class="table table-striped table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Sex
+</th>
+<th style="text-align:right;">
+Median
+</th>
+<th style="text-align:right;">
+Maximum
+</th>
+<th style="text-align:right;">
+Mean
+</th>
+<th style="text-align:right;">
+Standard Deviation
+</th>
+<th style="text-align:right;">
+Sample Size
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:right;">
+1290.0
+</td>
+<td style="text-align:right;">
+1930
+</td>
+<td style="text-align:right;">
+1219.16
+</td>
+<td style="text-align:right;">
+406.24
+</td>
+<td style="text-align:right;">
+138
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+1402.5
+</td>
+<td style="text-align:right;">
+1800
+</td>
+<td style="text-align:right;">
+1322.33
+</td>
+<td style="text-align:right;">
+333.75
+</td>
+<td style="text-align:right;">
+153
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Table 1</strong>: Median, Maximum, Mean, and Standard Deviation Weight of Snowshoe Hare by Sex. <em>Source: Kielland K., F. S. Chapin, R. W. Ruess. 2017. Snowshoe hare physical data in Bonanza Creek Experimental Forest: 1999-Present. Environmental Data Initiative.</em></p>
+<p>
+ 
+</p>
+<p><em>Table 1</em> shows that the average weight of males is higher than in females. However, the maximum weight was recorded by a female individual. Females also show a higher standard deviation.</p>
+<p>
+ 
+</p>
+<p>
+ 
+</p>
+<p>
+ 
+</p>
+<p><strong>Task 2: Principal Component Analysis</strong></p>
+<p>
+ 
+</p>
+<p>We will be performing a Principal Component Analysis to understand relationships between miscellaneous environmental and climatic variables at the country level. The data used was compiled and provided by <span class="citation">@zander_venter</span> on Kaggle, described as: “This data is all acquired through Google Earth Engine (<a href="https://earthengine.google.com/" class="uri">https://earthengine.google.com/</a>) where publicly available remote sensing datasets have been uploaded…Most of the data is derived by calculating the mean for each country at a reduction scale of about 10km.”</p>
+<p>
+ 
+</p>
+<p>This is the code I used to produce the table that comes after:</p>
+<pre class="r"><code>world &lt;- read_csv(&quot;world_env_vars.csv&quot;)
+
+world_nona &lt;- world %&gt;% 
+  drop_na()
+
+world_nona$Country = as.numeric(as.factor(world_nona$Country))
+
+world_pca &lt;- prcomp(world_nona, scale = TRUE)
+
+my_biplot &lt;- autoplot(world_pca, 
+                      colour = NA,
+                      loadings.label = TRUE,
+                      loadings.label.size = 3,
+                      loadings.label.colour = &quot;black&quot;,
+                      loadings.label.repel = TRUE) +
+  theme_minimal()</code></pre>
+<p>
+ 
+</p>
+<p><img src="projs1and2_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p><strong>Figure 2</strong>: Biplot of Miscellaneous environmental and climatic variables (country-level) <em>Source: Compiled and provided by <span class="citation">@zander_venter</span> on Kaggle from publicly available remote sensing datasets acquired through Google Earth Engine</em></p>
+<p>
+ 
+</p>
+<p><em>Figure 2</em> shows us that:</p>
+<p>• Dominant contributors to PC1 are the minimum temperature in coldest month, isothermality and anual rain mean.</p>
+<p>• Dominant contributors to PC2 are the max temperature in the warmest month, temperature in the warmest quarter, and rain seasonality.</p>
+<p>• Some interesting observations are that rain is highly correlated with tree canopy cover, but does not have correlation with cropland cover.</p>
+<p>• Wind and elevation are negatively correlated with isothermality, and positively correlated with cropland cover.</p>
 
 
 
