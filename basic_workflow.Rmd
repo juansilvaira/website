@@ -1,119 +1,234 @@
 ---
-title: "Basic workflow"
+title: "Project 3: Time series analysis"
 ---
 
-Building websites uses the same reproducible workflow you can use for your analyses and collaborations. It is very iterative. You can do it all from RStudio, with a combination of clicking or typing commands as you feel comfortable. 
 
-1. add content (text, code, images, etc) in an RMarkdown file
-1. knit the RMarkdown file to view
-1. update `_site.yml` (perhaps, if it is a new file)
-1. build the website
-    - Build tab > Build Website or
-    - in the console: `rmarkdown::render_site()`
-1. repeat, repeat, repeat
-1. commit and push your website to github, it's live!
-1. repeat all of the above
-
-Let's see what this looks like. We are not going to have time to learn all of the capabilities of R Markdown today, but the purpose here is to give you familiarlity with the workflow and confidence to explore further on your own.
-
-----
-
-## RStudio landscape
-
-Here is what you'll see when you've opened our `rmarkdown-website-tutorial` project in RStudio.  
-
-The 'Build tab' in the top right corner will show up once RStudio knows you're making a website, don't worry if you don't have it yet.  
-
-If we open `index.Rmd` we will see that it's all text with a bit of formatting. This top part is called the 'front matter'.  
-
-![](https://docs.google.com/drawings/d/1ff_I5VJAtmF0FYZOIFE6ZW_-8sfwfoOij2AR0eyFs00/pub?w=960&h=720)
-
-<br>
- 
-## Markdown Syntax 
- 
-Now let's look explore the first few webpages/R Markdown files to get familiar with Markdown syntax: 
-
-- `index.Rmd`
-- `first_observations.Rmd`
-- `basic_workflow.Rmd`
-
-These first few pages have simple formatting (**bold**, *italics*), headers, bullet points, links, and images. These are the majority of things you'll do in Markdown. See a full list of options at [**RStudio's Markdown basics**](http://rmarkdown.rstudio.com/authoring_basics.html) or go to Help > Markdown Quick Reference. Also, check out their [R Markdown cheatsheet](https://www.rstudio.com/resources/cheatsheets/).  
-
-Notice that you can insert images locally (from the /images folder), or from online e.g. Google Drawings!
- 
-From [rmarkdown.rstudio.com lesson 8](http://rmarkdown.rstudio.com/lesson-8.html): 
-
-![](images/markdown_rmarkdownlesson-8.png)
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 
+# For general stuff:
+library(tidyverse)
+library(janitor)
+library(lubridate)
+library(here)
+library(paletteer)
 
-<br> 
+# For ts stuff: 
+library(tsibble)
+library(fable)
+library(fabletools)
+library(feasts)
+library(forecast)
 
-## Build your website!
+fish <- read_csv("cbr_fish_passage_bonneville_allyrs_steelhead.csv")
 
-Let's make a few changes to this file and knit it to inspect. Try adding some new Markdown formatted text. 
+View(fish)
+names(fish)
+unique(fish$value)
 
-Also, now is a good time to make sure you have the the Build tab; you may need to install `rmarkdown` if you haven't already (below). 
 
-Click `Build Website` in the Build tab (or type `rmarkdown::render_site()` in the Console) and inspect your Website! Commit and push to see it live online. 
+# by day
+  
+fishdate <-  fish %>% 
+  separate(`mm-dd`, into = c("day", "month")) %>% 
+  mutate(date = paste(year, month, day, sep = "-"),
+         month_sep = paste(year, month, sep = "-"),
+         month_sep1= yearmonth(month_sep)) %>% 
+  drop_na(value)
 
-<br>
+ # by month
+        
 
-## Other
+fishdate2 <- fishdate %>% 
+  group_by(month_sep1) %>% 
+  summarise(
+    sumvalue= sum(value)) 
 
-### Tips for learning Markdown
+#  by year
 
-**In Markdown, spaces can be tricky**.  
-To start a new line here, I needed 2 spaces after `tricky.  ` above. 
-As you can see, a simple carriage return doesn't cut it. 
+fishdate3 <- fishdate %>% 
+  group_by(year) %>% 
+  summarise(
+    sumvalue =sum(value)
+  )
 
-To force carriage returns, use the `<br>` html tag...
+fishdate3
 
-<br>
-<br>
+# plots 
 
-...like this.  
+# by day
 
-Also, this bulleted list won't render properly:
-- because there is no carriage return between the line above
-- and where the bullet points start. 
+fish_gg <- ggplot(data = fishdate, aes(x = month_sep1, y = value)) +
+  geom_line() +
+  theme_minimal() +
+  scale_y_continuous(limits = c(0, 350))
 
-To have the bullet points render nicely: 
+fish_gg
 
-- you must have a full blank line 
-- following "To have the bullet points render nicely:"
+# by month
 
-<br>
+fish_gg2 <- ggplot(data = fishdate2, aes(x = month_sep1, y = sumvalue)) +
+  geom_line() +
+  theme_minimal() 
 
-### Building a website from scratch
+fish_gg2
 
-If you want to build a website from scratch (i.e. not fork this one), follow RStudio's instructions here: [R Markdown Websites
-](https://rmarkdown.rstudio.com/rmarkdown_websites.html). 
+# by year
 
-**Troubleshooting:**  
+fish_gg3 <- ggplot(data = fishdate3, aes(x = year, y = sumvalue)) +
+  geom_line() +
+  theme_minimal() 
 
-We recently had trouble having our nicely built website display online: the website's url only showed the README (nicely formatted though!). We solved it by adding:
+fish_gg3
+
+# Parse the data
+fish_parsed <- fishdate2 %>% 
+  mutate(month = month(month_sep1, label = TRUE)) %>% 
+  mutate(year = year(month_sep1))
+
+### Coerce to a tsibble:
+
+fish_ts <- as_tsibble(fish_parsed, index = month_sep1)
+
+
+fishplot2 <- ggplot(data = fish_parsed, aes(x = month, y = sumvalue, group = year)) +
+  geom_line(aes(color = year)) 
+
+fishplot2
+
+
+
 
 ```
-output_dir: "."
+
+<p>&nbsp;</p>
+
+**Task 2: Time series data wrangling, exploration and visualization**
+
+In this project I will wrangle, explore, and visualize time series data for steelhead salmon passage across the Bonneville Dam (Oregon) from 1940 - 2019. I will present a  time series plot with daily data on passage counts, a seasonplot to explore if/how monthly passage has shifted over time, and a visualization of annual steelhead passage counts. 
+
+
+<p>&nbsp;</p>
+
+```{r out.width = "70%", fig.align = "center", echo = FALSE}
+
+knitr::include_graphics("images/steel.jpg")
+
+
+```
+<center> 
+
+Steelhead *(Oncorhynchus mykiss)*. *Photo: United States Department of Agriculture, Forest Service* 
+
+</center>
+
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+
+This is the code I used to produce Figure 1:
+```{r}
+fish <- read_csv("cbr_fish_passage_bonneville_allyrs_steelhead.csv")
+
+fishdate <-  fish %>% 
+  separate(`mm-dd`, into = c("day", "month")) %>% 
+  mutate(date = paste(year, month, day, sep = "-"),
+         month_sep = paste(year, month, sep = "-"),
+         month_sep1= yearmonth(month_sep)) %>% 
+  drop_na(value)
+
+fish_gg <- ggplot(data = fishdate, aes(x = month_sep1, y = value)) +
+  geom_line() +
+  theme_minimal() +
+  scale_y_continuous(limits = c(0, 350)) +
+    labs (x = "Time (days)", y = "Count", title = "Time series of passage counts for Steelhead in Bonneville Dam (1939-2019)")
+
+fish_gg
+
+
 ```
 
-to the `_site.yml`. This knits all the .html files in place in the home directory instead of in a `_site` folder, and this solved our problem!
+**Figure 1**: Time series of passage counts for Steelhead in Bonneville Dam (1939-2019) per day. *Source: Columbia River DART, Columbia Basin Research, University of Washington. (2019). Adult Passage Graphics & Text.*
 
-### Install the `rmarkdown` package
+<p>&nbsp;</p>
 
-You can do this by: 
+Since it seems really difficult to identify any patterns with the data presented by day, I tried a new time series plot, but this time by month.
 
-1. paste this code in the Console and hit enter
+<p>&nbsp;</p>
 
-    ```
-    install.packages('rmarkdown')
-    library(rmarkdown) 
-    ```
-1. from the menu bar select: Tools > Install Packages... "rmarkdown"
-1. from the bottom right pane, click on the Packages tab, click on Install, "rmarkdown"
+This is the code I used to produce Figure 2:
 
-<!---note that the ``` ``` syntax above renders text as a code-looking block--->
+```{r}
+fishdate2 <- fishdate %>% 
+  group_by(month_sep1) %>% 
+  summarise(
+    sumvalue= sum(value)) 
+
+fish_gg2 <- ggplot(data = fishdate2, aes(x = month_sep1, y = sumvalue)) +
+  geom_line() +
+  theme_minimal() +
+   labs (x = "Time (months)", y = "Count", title = "Time series of passage counts for Steelhead in Bonneville Dam (1939-2019)") + scale_y_continuous(labels = scales::comma)
+
+fish_gg2
+```
 
 
+**Figure 2**: Time series of passage counts for Steelhead in Bonneville Dam (1939-2019) per month *Source: Columbia River DART, Columbia Basin Research, University of Washington. (2019). Adult Passage Graphics & Text.*
+
+<p>&nbsp;</p>
+
+As observed in Figure 2, there is a very clear annual seasonality, but no clear cyclical trend. Even though there is a massive increase of salmon counts around years 2001 and 2010, it's not clear that the trend is increasing. In fact, starting in year 2015, there is an important decrease in counts.
+
+<p>&nbsp;</p>
+
+This is the code I used to produce Figure 3:
+```{r}
+# Parse the data
+fish_parsed <- fishdate2 %>% 
+  mutate(month = month(month_sep1, label = TRUE)) %>% 
+  mutate(year = year(month_sep1))
+
+### Coerce to a tsibble:
+
+fish_ts <- as_tsibble(fish_parsed, index = month_sep1)
+
+
+fishplot2 <- ggplot(data = fish_parsed, aes(x = month, y = sumvalue, group = year)) +
+  geom_line(aes(color = year)) + 
+  theme_minimal() +
+   labs (x = "Month", y = "Count", title = "Seasonplot of monthly passage of Steelhead in Bonneville Dam (1939-2019)") + scale_y_continuous(labels = scales::comma)
+
+fishplot2
+
+```
+
+**Figure 3**: "Seasonplot of monthly passage of Steelhead in Bonneville Dam (1939-2019). *Source: Columbia River DART, Columbia Basin Research, University of Washington. (2019). Adult Passage Graphics & Text.*
+
+<p>&nbsp;</p>
+
+Figure 3 clearly shows that steelhead count peaks in August every year, and that those peaks have been getting larger in the 2000's.
+
+<p>&nbsp;</p>
+
+This is the code I used to produce Figure 4:
+```{r}
+
+fishdate3 <- fishdate %>% 
+  group_by(year) %>% 
+  summarise(
+    sumvalue =sum(value)
+  )
+
+fish_gg3 <- ggplot(data = fishdate3, aes(x = year, y = sumvalue)) +
+  geom_line() +
+  theme_minimal() +
+  labs (x = "Year", y = "Count", title = "Annual Steelhead passage counts in Bonneville Dam (1939-2019)") + scale_y_continuous(labels = scales::comma)
+
+fish_gg3
+```
+
+**Figure 4**: "Annual Steelhead passage counts in Bonneville Dam (1939-2019). *Source: Columbia River DART, Columbia Basin Research, University of Washington. (2019). Adult Passage Graphics & Text.*
+
+<p>&nbsp;</p>
+
+Figure 4 shows even more clearly the patterns of annual seasonality and relatively sustained increased in counts towards the year 2000-2010, and a decline after year 2015.
