@@ -1,0 +1,182 @@
+---
+title: "Project 4: Spatial analysis"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+
+# rm(list=ls()) # clears workspace
+library(tidyverse)
+library(here)
+library(janitor)
+library(raster)
+library(sf)
+library(tmap)
+library(tmaptools)
+library(knitr)
+# 
+# 
+landuse <- read_sf(dsn = here("Land_Use_Land_Cover_LULC"), layer = "Land_Use_Land_Cover_LULC")
+
+watersheds <-  read_sf(dsn = here("Watersheds"), layer = "Watersheds")
+# 
+# # plot(landuse)
+# # 
+# # plot(watersheds)
+# 
+# 
+# landuseselect <-  landuse %>% 
+#   mutate(
+#     landusenew = case_when(
+#       landcover == "Cropland and Pasture" ~ "Natural",
+#       landcover == "Evergreen Forest Land" ~ "Natural",
+#       landcover == "Streams and Canals" ~ "Natural",
+#       landcover == "Orchards, Groves, Vineyards, Nurseries and Ornamental Horticultural Areas" ~ "Natural",
+#       landcover == "Forested Wetland" ~ "Natural",
+#       landcover == "Reservoirs" ~ "Natural",
+#       landcover == "Nonforested Wetland" ~ "Natural",
+#       landcover == "Bare Exposed Rock" ~ "Natural",
+#       landcover == "Sandy Areas Other than Beaches" ~ "Natural",
+#       landcover == "Mixed Rangeland" ~ "Agricultural",
+#       landcover == "Shrub and Brush Rangeland" ~ "Agricultural",
+#       landcover == "Herbaceous Rangeland" ~ "Agricultural",
+#       landcover == "Other Agricultural Land" ~ "Agricultural",
+#       landcover == "Beaches" ~ "Natural",
+#       landcover == "Lakes" ~ "Natural",
+#       landcover == "Mixed Barren Land" ~ "Natural",
+#       landcover == "Bays and Estuaries" ~ "Natural",
+#       landcover == "0" ~ "NA",
+#       landcover == "Commercial and Services" ~ "Industrial",
+#        landcover == "Strip Mines, Quarries, and Gravel Pits" ~ "Industrial",
+#        landcover == "Confined Feeding Operations" ~ "Industrial",
+#        landcover == "Residential" ~ "Residential",
+#        landcover == "Transportation, Communications and Utilities" ~ "Industrial",
+#        landcover == "Mixed Urban or Built-up Land" ~ "Residential",
+#        landcover == "Transitional Areas" ~ "Industrial",
+#        landcover == "Industrial and Commercial Complexes" ~ "Industrial",
+#       landcover == "Industrial" ~ "Industrial",
+#       landcover == "Other Urban or Built-up Land" ~ "Residential"
+#       )) 
+# 
+# 
+# 
+# # tmap_mode("view")
+# 
+# 
+# tm_shape(landuseselect) +
+#   tm_fill("landusenew", title = "Land Cover", style = "fixed") +
+#   tm_borders() +
+# tm_layout("Land Use",
+#           title.position = c("center", "top"),
+#           legend.title.size = 1,
+#           legend.text.size = 0.6,
+#           legend.position = c("left","bottom"),
+#           legend.bg.color = "white",
+#           legend.bg.alpha = 1)
+#   tm_basemap("Stamen.Terrain")
+# 
+# 
+# tm_shape(watersheds) +
+#   tm_fill("area_sqmi") +
+#   tm_basemap("Stamen.Terrain")
+
+# Watersheds
+
+
+```
+<p>&nbsp;</p>
+**Project 4: Map of Hawaiian land use/land cover and watersheds* (or some other shapefile data, in R)**
+<p>&nbsp;</p>
+
+In this document, I'm going to show interactive maps for different land use / land cover types for all main Hawaiian islands, and for different watersheds for all main Hawaiian islands.
+<p>&nbsp;</p>
+**The data being used are:**<p>&nbsp;</p>
+
+**- For Map 1:** "Land Use Land Cover of main Hawaiian Islands as of 1976". Source: 1:100,000 1976 Digital GIRAS (Geographic Information Retrieval and Analysis) files. Land Use and Land Cover (LULC) data consists of historical land use and land cover
+classification data that was based primarily on the manual interpretation of 1970's and 1980's aerial photography. Secondary sources included land use maps and surveys. <p>&nbsp;</p>
+**- For Map 2:** Surface Water Hyrdrologic Unit Boundaries (Watersheds) for the 8 major Hawaiian Islands. Source: GDSI, 1995, 1999; State of Hawaii Commission on Water Resource Management (CWRM), 2008.  Provided to State GIS, August, 2017.
+<p>&nbsp;</p>
+
+
+The following code was used to build Map 1:
+```{r}
+
+
+landuse <- read_sf(dsn = here("Land_Use_Land_Cover_LULC"), layer = "Land_Use_Land_Cover_LULC") 
+
+landuseselect <-  landuse %>% 
+  mutate(
+    landusenew = case_when(
+      landcover == "Cropland and Pasture" ~ "Natural",
+      landcover == "Evergreen Forest Land" ~ "Natural",
+      landcover == "Streams and Canals" ~ "Natural",
+      landcover == "Orchards, Groves, Vineyards, Nurseries and Ornamental Horticultural Areas" ~ "Natural",
+      landcover == "Forested Wetland" ~ "Natural",
+      landcover == "Reservoirs" ~ "Natural",
+      landcover == "Nonforested Wetland" ~ "Natural",
+      landcover == "Bare Exposed Rock" ~ "Natural",
+      landcover == "Sandy Areas Other than Beaches" ~ "Natural",
+      landcover == "Mixed Rangeland" ~ "Agricultural",
+      landcover == "Shrub and Brush Rangeland" ~ "Agricultural",
+      landcover == "Herbaceous Rangeland" ~ "Agricultural",
+      landcover == "Other Agricultural Land" ~ "Agricultural",
+      landcover == "Beaches" ~ "Natural",
+      landcover == "Lakes" ~ "Natural",
+      landcover == "Mixed Barren Land" ~ "Natural",
+      landcover == "Bays and Estuaries" ~ "Natural",
+      landcover == "0" ~ "NA",
+      landcover == "Commercial and Services" ~ "Industrial",
+       landcover == "Strip Mines, Quarries, and Gravel Pits" ~ "Industrial",
+       landcover == "Confined Feeding Operations" ~ "Industrial",
+       landcover == "Residential" ~ "Residential",
+       landcover == "Transportation, Communications and Utilities" ~ "Industrial",
+       landcover == "Mixed Urban or Built-up Land" ~ "Residential",
+       landcover == "Transitional Areas" ~ "Industrial",
+       landcover == "Industrial and Commercial Complexes" ~ "Industrial",
+      landcover == "Industrial" ~ "Industrial",
+      landcover == "Other Urban or Built-up Land" ~ "Residential"
+      )) 
+
+tmap_mode("view")
+
+
+landusemap <- tm_shape(landuseselect) +
+  tm_fill("landusenew", title = "Land Cover") +
+  tm_borders() +
+  tm_layout(
+          title.position = c("center", "top"),
+          legend.title.size = 1,
+          legend.text.size = 0.6,
+          legend.position = c("left","bottom"),
+          legend.bg.color = "white",
+          legend.bg.alpha = 1) +
+  tm_basemap("Stamen.Terrain")
+  
+  landusemap
+  
+```
+
+**Map 1:** Land Use in Hawaiian Islands *Source: 1:100,000 1976 Digital GIRAS (Geographic Information Retrieval and Analysis) files.*
+<p>&nbsp;</p>
+
+The following code was used to build Map 2:
+```{r}
+
+tmap_mode("view")
+
+watershedmap <- tm_shape(watersheds) +
+  tm_fill("area_sqmi", title = "Square Kilometers") +
+  tm_borders() +
+  tm_layout(
+          legend.title.size = 1,
+          legend.text.size = 0.6,
+          legend.position = c("left","bottom"),
+          legend.bg.color = "white",
+          legend.bg.alpha = 1) +
+  tm_basemap("Stamen.Terrain")
+
+watershedmap
+
+```
+
+**Map 2:** Watersheds for the 8 major Hawaiian Islands. *Source: GDSI, 1995, 1999; State of Hawaii Commission on Water Resource Management (CWRM), 2008.  Provided to State GIS, August, 2017.*
